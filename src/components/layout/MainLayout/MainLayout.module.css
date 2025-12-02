@@ -1,0 +1,40 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.footer {
+  text-align: center;
+  padding: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-card);
+}
+
+.footer p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.footerSubtext {
+  margin-top: 0.25rem !important;
+  font-size: 0.75rem !important;
+  color: var(--color-text-muted) !important;
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding: 1.5rem 1rem;
+  }
+}
+

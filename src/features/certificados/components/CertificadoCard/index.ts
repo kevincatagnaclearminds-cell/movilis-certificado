@@ -1,0 +1,2 @@
+export { CertificadoCard } from './CertificadoCard';
+

@@ -1,0 +1,2 @@
+export { useCertificados } from './useCertificados';
+

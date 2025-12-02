@@ -1,0 +1,148 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.gradient1 {
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 60%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+  filter: blur(60px);
+  animation: float 20s ease-in-out infinite;
+}
+
+.gradient2 {
+  position: absolute;
+  bottom: -20%;
+  left: -10%;
+  width: 50%;
+  height: 70%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%);
+  filter: blur(60px);
+  animation: float 25s ease-in-out infinite reverse;
+}
+
+.pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 1px 1px, var(--color-border) 1px, transparent 0);
+  background-size: 40px 40px;
+  opacity: 0.5;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6rem;
+  padding: 2rem;
+  max-width: 1000px;
+  width: 100%;
+}
+
+.brandSection {
+  flex: 1;
+}
+
+.brandTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--color-text) 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brandTagline {
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 2.5rem;
+  line-height: 1.5;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.featureIcon {
+  font-size: 1.25rem;
+}
+
+.formSection {
+  flex: 1;
+  max-width: 440px;
+}
+
+@media (max-width: 900px) {
+  .content {
+    flex-direction: column;
+    gap: 3rem;
+    text-align: center;
+  }
+
+  .brandTitle {
+    font-size: 3rem;
+  }
+
+  .features {
+    align-items: center;
+  }
+
+  .formSection {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .brandTitle {
+    font-size: 2.5rem;
+  }
+
+  .brandTagline {
+    font-size: 1rem;
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
+}
+
