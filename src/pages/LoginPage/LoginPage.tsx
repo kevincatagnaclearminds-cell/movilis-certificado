@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
+import { Shield, FileCheck, Clock, Award } from 'lucide-react';
 import { LoginForm } from '@/features/auth';
 import { ROUTES } from '@/config';
+import movilisLogo from '@/assets/images/movilis.png';
 import styles from './LoginPage.module.css';
 
 export const LoginPage = () => {
@@ -12,37 +14,61 @@ export const LoginPage = () => {
 
   return (
     <div className={styles.page}>
-      <div className={styles.background}>
-        <div className={styles.gradient1} />
-        <div className={styles.gradient2} />
-        <div className={styles.pattern} />
-      </div>
-      
-      <div className={styles.content}>
-        <div className={styles.brandSection}>
-          <h1 className={styles.brandTitle}>Movilis</h1>
-          <p className={styles.brandTagline}>
-            Sistema de Certificados<br />con Firma Electrónica
-          </p>
+      {/* Panel izquierdo - Branding */}
+      <div className={styles.brandPanel}>
+        <div className={styles.brandContent}>
+          <img src={movilisLogo} alt="Movilis" className={styles.logo} />
+          <h1 className={styles.brandTitle}>MOVILIS</h1>
+          <p className={styles.brandSubtitle}>Sistema de Certificados Digitales</p>
+          
           <div className={styles.features}>
             <div className={styles.feature}>
-              <span className={styles.featureIcon}>🔐</span>
-              <span>Certificados seguros</span>
+              <div className={styles.featureIcon}>
+                <Shield size={24} />
+              </div>
+              <div className={styles.featureText}>
+                <h3>Seguridad Garantizada</h3>
+                <p>Protección de datos con encriptación avanzada</p>
+              </div>
             </div>
+            
             <div className={styles.feature}>
-              <span className={styles.featureIcon}>✍️</span>
-              <span>Firma electrónica válida</span>
+              <div className={styles.featureIcon}>
+                <FileCheck size={24} />
+              </div>
+              <div className={styles.featureText}>
+                <h3>Firma Electrónica</h3>
+                <p>Certificados con validez legal</p>
+              </div>
             </div>
+            
             <div className={styles.feature}>
-              <span className={styles.featureIcon}>📥</span>
-              <span>Descarga inmediata</span>
+              <div className={styles.featureIcon}>
+                <Clock size={24} />
+              </div>
+              <div className={styles.featureText}>
+                <h3>Acceso Inmediato</h3>
+                <p>Descarga tus certificados al instante</p>
+              </div>
             </div>
           </div>
         </div>
+        
+        <div className={styles.brandFooter}>
+          <Award size={16} />
+          <span>Plataforma certificada y segura</span>
+        </div>
+      </div>
 
-        <div className={styles.formSection}>
+      {/* Panel derecho - Formulario */}
+      <div className={styles.formPanel}>
+        <div className={styles.formContainer}>
           <LoginForm onSuccess={handleLoginSuccess} />
         </div>
+        
+        <p className={styles.copyright}>
+          © {new Date().getFullYear()} Movilis. Todos los derechos reservados.
+        </p>
       </div>
     </div>
   );

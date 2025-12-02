@@ -1,12 +1,28 @@
 import type { AuthResponse, User } from '@/types';
-import { delay, capitalizeWords } from '@/utils';
+import { delay } from '@/utils';
 
 /**
  * Servicio de autenticación
- * En producción, estas funciones llamarían a tu API real
+ * Configuración para API real de Ecuador
  */
 
-// Datos de demostración
+// ============================================
+// CONFIGURACIÓN DE API
+// Cambia estas variables según tu proveedor de API
+// ============================================
+const API_CONFIG = {
+  // URL de tu API backend que consulta el Registro Civil
+  // Ejemplo: 'https://tu-api.com/api/consultar-cedula'
+  baseUrl: import.meta.env.VITE_API_URL || '',
+  
+  // API Key si tu proveedor lo requiere
+  apiKey: import.meta.env.VITE_API_KEY || '',
+  
+  // Modo demo (true = usa datos de prueba, false = usa API real)
+  demoMode: true,
+};
+
+// Datos de demostración (solo se usan cuando demoMode = true)
 const DEMO_USERS: Record<string, User> = {
   '1234567890': {
     cedula: '1234567890',
@@ -37,19 +53,62 @@ const DEMO_USERS: Record<string, User> = {
   },
 };
 
+/**
+ * Consulta la API real del Registro Civil de Ecuador
+ */
+async function consultarCedulaReal(cedula: string): Promise<User | null> {
+  try {
+    const response = await fetch(`${API_CONFIG.baseUrl}/consultar-cedula`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_CONFIG.apiKey}`,
+      },
+      body: JSON.stringify({ cedula }),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    
+    // Adapta esto según la estructura de respuesta de tu API
+    if (data && data.nombres) {
+      return {
+        cedula: cedula,
+        nombreCompleto: `${data.nombres} ${data.apellidos}`,
+        primerNombre: data.primerNombre || data.nombres.split(' ')[0],
+        segundoNombre: data.segundoNombre || data.nombres.split(' ')[1] || '',
+        primerApellido: data.primerApellido || data.apellidos.split(' ')[0],
+        segundoApellido: data.segundoApellido || data.apellidos.split(' ')[1] || '',
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error consultando cédula:', error);
+    return null;
+  }
+}
+
 export const authService = {
   /**
    * Inicia sesión con número de cédula
    */
   async login(cedula: string): Promise<AuthResponse> {
-    // Simular delay de red
-    await delay(1000);
-
-    // Limpiar cédula
     const cleanedCedula = cedula.replace(/[.\s]/g, '');
+    
+    let user: User | null = null;
 
-    // Buscar usuario (en producción, esto sería una llamada a la API)
-    const user = DEMO_USERS[cleanedCedula];
+    if (API_CONFIG.demoMode) {
+      // Modo demo: usar datos de prueba
+      await delay(1000);
+      user = DEMO_USERS[cleanedCedula] || null;
+    } else {
+      // Modo producción: consultar API real
+      user = await consultarCedulaReal(cleanedCedula);
+    }
 
     if (user) {
       return {
@@ -60,27 +119,9 @@ export const authService = {
       };
     }
 
-    // Si no existe, crear uno genérico para demo
-    // En producción, esto retornaría un error
-    if (cleanedCedula.length >= 6) {
-      const generatedUser: User = {
-        cedula: cleanedCedula,
-        nombreCompleto: capitalizeWords('Usuario Demo'),
-        primerNombre: 'Usuario',
-        primerApellido: 'Demo',
-      };
-
-      return {
-        success: true,
-        user: generatedUser,
-        token: `token_${Date.now()}`,
-        message: 'Inicio de sesión exitoso',
-      };
-    }
-
     return {
       success: false,
-      message: 'Cédula no encontrada. Verifica el número ingresado.',
+      message: 'Cédula no encontrada',
     };
   },
 

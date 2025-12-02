@@ -3,7 +3,7 @@ import { Header } from '../Header';
 import styles from './MainLayout.module.css';
 
 interface MainLayoutProps {
-  children: ReactNode;.
+  children: ReactNode;
   showHeader?: boolean;
 }
 

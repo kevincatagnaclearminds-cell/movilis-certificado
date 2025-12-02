@@ -1,10 +1,11 @@
 .header {
-  background: var(--color-card);
-  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  border-bottom: 2px solid var(--color-accent);
   position: sticky;
   top: 0;
   z-index: 100;
   backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(139, 26, 122, 0.4);
 }
 
 .container {
@@ -25,13 +26,9 @@
 .logo {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .brandText {
@@ -43,15 +40,16 @@
   font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-accent);
   letter-spacing: -0.02em;
   margin: 0;
   line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .subtitle {
   font-size: 0.75rem;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 500;
@@ -71,18 +69,40 @@
 
 .userName {
   font-weight: 600;
-  color: var(--color-text);
+  color: white;
   font-size: 0.9375rem;
 }
 
 .userCedula {
   font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.75);
 }
 
+/* Tablet */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.875rem 1.25rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .userSection {
+    gap: 1rem;
+  }
+}
+
+/* Móvil */
 @media (max-width: 640px) {
   .container {
-    padding: 0.875rem 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
   }
 
   .brandText {
@@ -91,6 +111,22 @@
 
   .userInfo {
     display: none;
+  }
+
+  .userSection {
+    gap: 0.75rem;
+  }
+}
+
+/* Móvil pequeño */
+@media (max-width: 375px) {
+  .container {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .logo {
+    width: 36px;
+    height: 36px;
   }
 }
 

@@ -10,7 +10,8 @@
   padding: 2rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 8px 32px rgba(139, 26, 122, 0.4);
+  border: 2px solid rgba(245, 184, 0, 0.3);
 }
 
 .welcomeContent {
@@ -30,8 +31,9 @@
   font-family: 'Playfair Display', serif;
   font-size: 2rem;
   font-weight: 700;
-  color: white;
+  color: var(--color-accent);
   margin: 0.25rem 0 0.5rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .userInfo {
@@ -55,7 +57,7 @@
   right: -10%;
   width: 200px;
   height: 200px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(245, 184, 0, 0.15);
   border-radius: 50%;
 }
 
@@ -65,21 +67,57 @@
   right: 20%;
   width: 150px;
   height: 150px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(245, 184, 0, 0.08);
   border-radius: 50%;
 }
 
+/* Tablet */
+@media (max-width: 768px) {
+  .page {
+    gap: 1.5rem;
+  }
+
+  .welcomeSection {
+    border-radius: 16px;
+  }
+}
+
+/* Móvil */
 @media (max-width: 640px) {
   .welcomeSection {
     padding: 1.5rem;
+    border-radius: 12px;
+  }
+
+  .greeting {
+    font-size: 0.8125rem;
   }
 
   .userName {
     font-size: 1.5rem;
   }
 
+  .userInfo {
+    font-size: 0.875rem;
+  }
+
   .welcomeDecoration {
     display: none;
+  }
+}
+
+/* Móvil pequeño */
+@media (max-width: 375px) {
+  .page {
+    gap: 1rem;
+  }
+
+  .welcomeSection {
+    padding: 1.25rem;
+  }
+
+  .userName {
+    font-size: 1.35rem;
   }
 }
 

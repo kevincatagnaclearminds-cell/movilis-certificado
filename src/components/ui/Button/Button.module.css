@@ -25,14 +25,16 @@
 
 /* Variantes */
 .primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: white;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(245, 184, 0, 0.4);
 }
 
 .primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 6px 20px rgba(245, 184, 0, 0.5);
+  background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%);
 }
 
 .primary:active:not(:disabled) {
@@ -40,35 +42,36 @@
 }
 
 .secondary {
-  background: var(--color-surface);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--color-text);
-  border-color: var(--color-border);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .secondary:hover:not(:disabled) {
-  background: var(--color-surface-hover);
-  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .outline {
   background: transparent;
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .outline:hover:not(:disabled) {
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-primary-dark);
 }
 
 .ghost {
   background: transparent;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .ghost:hover:not(:disabled) {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-accent);
 }
 
 .danger {
@@ -138,5 +141,34 @@
 .content {
   display: flex;
   align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .lg {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .md {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9375rem;
+  }
+
+  /* Desactivar hover en touch */
+  .primary:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .primary:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+}
+
+@media (max-width: 375px) {
+  .lg {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9375rem;
+  }
 }
 

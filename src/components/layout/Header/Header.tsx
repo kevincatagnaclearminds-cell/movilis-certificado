@@ -1,6 +1,7 @@
-import { LogOut, Shield } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import movilisLogo from '@/assets/images/movilis.png';
 import styles from './Header.module.css';
 
 export const Header = () => {
@@ -10,9 +11,7 @@ export const Header = () => {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.brand}>
-          <div className={styles.logo}>
-            <Shield size={28} />
-          </div>
+          <img src={movilisLogo} alt="Movilis" className={styles.logo} />
           <div className={styles.brandText}>
             <h1 className={styles.title}>Movilis</h1>
             <span className={styles.subtitle}>Sistema de Certificados</span>

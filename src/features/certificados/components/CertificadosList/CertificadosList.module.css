@@ -10,7 +10,7 @@
   font-family: 'Playfair Display', serif;
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-accent);
   margin: 0 0 0.25rem;
 }
 
@@ -49,22 +49,22 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  background: var(--color-card);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .errorIcon,
 .emptyIcon {
   width: 80px;
   height: 80px;
-  background: var(--color-surface-hover);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  color: var(--color-text-muted);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .error h3,
@@ -82,13 +82,68 @@
   max-width: 300px;
 }
 
+/* Tablet */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+/* Móvil */
 @media (max-width: 640px) {
+  .header {
+    margin-bottom: 1.25rem;
+  }
+
   .grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .title {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .loading,
+  .error,
+  .empty {
+    padding: 3rem 1.5rem;
+    border-radius: 12px;
+  }
+
+  .errorIcon,
+  .emptyIcon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+  }
+
+  .error h3,
+  .empty h3 {
+    font-size: 1.125rem;
+  }
+
+  .error p,
+  .empty p {
+    font-size: 0.875rem;
+  }
+}
+
+/* Móvil pequeño */
+@media (max-width: 375px) {
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .loading,
+  .error,
+  .empty {
+    padding: 2.5rem 1rem;
   }
 }
 
