@@ -51,6 +51,15 @@ const DEMO_USERS: Record<string, User> = {
     segundoApellido: 'Silva',
     email: 'carlos.martinez@email.com',
   },
+  '1728963594': {
+    cedula: '1728963594',
+    nombreCompleto: 'Jeremy Llumiquinga',
+    primerNombre: 'Jeremy',
+    segundoNombre: '',
+    primerApellido: 'Llumiquinga',
+    segundoApellido: '',
+    email: 'jeremy.llumiquinga@email.com',
+  },
 };
 
 /**

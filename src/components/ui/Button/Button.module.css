@@ -25,16 +25,16 @@
 
 /* Variantes */
 .primary {
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
-  color: var(--color-primary-dark);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: #FFFFFF;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(245, 184, 0, 0.4);
+  box-shadow: 0 4px 14px rgba(139, 26, 122, 0.4);
 }
 
 .primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(245, 184, 0, 0.5);
-  background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%);
+  box-shadow: 0 6px 20px rgba(139, 26, 122, 0.5);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
 }
 
 .primary:active:not(:disabled) {

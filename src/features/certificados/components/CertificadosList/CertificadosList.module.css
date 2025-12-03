@@ -7,16 +7,16 @@
 }
 
 .title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-primary);
   margin: 0 0 0.25rem;
 }
 
 .subtitle {
   font-size: 0.9375rem;
-  color: var(--color-text-secondary);
+  color: #6B7280;
   margin: 0;
 }
 
@@ -37,7 +37,7 @@
 
 .loading p {
   margin-top: 1rem;
-  color: var(--color-text-secondary);
+  color: #6B7280;
   font-size: 0.9375rem;
 }
 
@@ -49,35 +49,35 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: #F9FAFB;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .errorIcon,
 .emptyIcon {
   width: 80px;
   height: 80px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .error h3,
 .empty h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: #1F2937;
   margin: 0 0 0.5rem;
 }
 
 .error p,
 .empty p {
-  color: var(--color-text-secondary);
+  color: #6B7280;
   margin: 0 0 1.5rem;
   max-width: 300px;
 }

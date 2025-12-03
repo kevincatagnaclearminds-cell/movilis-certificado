@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Shield, FileCheck, Clock, Award } from 'lucide-react';
 import { LoginForm } from '@/features/auth';
 import { ROUTES } from '@/config';
-import movilisLogo from '@/assets/images/movilis.png';
+import movilisLogo from '@/assets/images/logo movilis.png';
 import styles from './LoginPage.module.css';
 
 export const LoginPage = () => {
@@ -18,7 +18,6 @@ export const LoginPage = () => {
       <div className={styles.brandPanel}>
         <div className={styles.brandContent}>
           <img src={movilisLogo} alt="Movilis" className={styles.logo} />
-          <h1 className={styles.brandTitle}>MOVILIS</h1>
           <p className={styles.brandSubtitle}>Sistema de Certificados Digitales</p>
           
           <div className={styles.features}>

@@ -42,10 +42,15 @@ export const useCertificados = (): UseCertificadosReturn => {
   }, [user?.cedula]);
 
   const downloadCertificado = useCallback(async (certificado: Certificado) => {
+    if (!user) {
+      setError('Usuario no autenticado');
+      return;
+    }
+
     setDownloadingId(certificado.id);
 
     try {
-      const blob = await certificadosService.downloadCertificado(certificado);
+      const blob = await certificadosService.downloadCertificado(certificado, user);
       
       // Crear URL temporal y descargar
       const url = window.URL.createObjectURL(blob);
@@ -62,7 +67,7 @@ export const useCertificados = (): UseCertificadosReturn => {
     } finally {
       setDownloadingId(null);
     }
-  }, []);
+  }, [user]);
 
   // Cargar certificados automáticamente cuando hay usuario
   useEffect(() => {

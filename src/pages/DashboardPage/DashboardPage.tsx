@@ -31,10 +31,6 @@ export const DashboardPage = () => {
               C.C. {user.cedula} {user.email && `• ${user.email}`}
             </p>
           </div>
-          <div className={styles.welcomeDecoration}>
-            <div className={styles.decorCircle1} />
-            <div className={styles.decorCircle2} />
-          </div>
         </div>
 
         <CertificadosList />

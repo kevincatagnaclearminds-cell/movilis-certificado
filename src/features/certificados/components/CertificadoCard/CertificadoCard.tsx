@@ -35,7 +35,7 @@ const TIPO_COLORS: Record<CertificadoTipo, string> = {
   ingresos: '#10B981',
   capacitacion: '#8B5CF6',
   participacion: '#F59E0B',
-  competencia: '#EF4444',
+  competencia: '#6B7280',
   otro: '#6B7280',
 };
 
@@ -71,7 +71,7 @@ export const CertificadoCard = ({
 
   return (
     <Card variant="default" padding="none" hoverable className={styles.card}>
-      <div className={styles.header} style={{ borderLeftColor: tipoColor }}>
+      <div className={styles.header}>
         <div className={styles.iconWrapper} style={{ backgroundColor: `${tipoColor}15`, color: tipoColor }}>
           {TIPO_ICONS[certificado.tipo]}
         </div>

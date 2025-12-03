@@ -27,7 +27,7 @@
   width: 48px;
   height: 48px;
   border-radius: 10px;
-  object-fit: cover;
+  object-fit: contain;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -37,7 +37,7 @@
 }
 
 .title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-accent);
@@ -48,11 +48,11 @@
 }
 
 .subtitle {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .userSection {
@@ -82,10 +82,6 @@
 @media (max-width: 768px) {
   .container {
     padding: 0.875rem 1.25rem;
-  }
-
-  .title {
-    font-size: 1.25rem;
   }
 
   .userSection {

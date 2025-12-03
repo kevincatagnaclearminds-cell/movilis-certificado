@@ -1,5 +1,6 @@
-import type { Certificado, CertificadosResponse } from '@/types';
+import type { Certificado, CertificadosResponse, User } from '@/types';
 import { delay } from '@/utils';
+import { generateCertificadoPDF } from '../utils/pdfGenerator';
 
 /**
  * Servicio de certificados
@@ -147,34 +148,17 @@ export const certificadosService = {
   },
 
   /**
-   * Descarga un certificado (genera un PDF simulado)
+   * Descarga un certificado (genera un PDF usando la plantilla)
    */
-  async downloadCertificado(certificado: Certificado): Promise<Blob> {
+  async downloadCertificado(certificado: Certificado, user: User): Promise<Blob> {
     await delay(1500);
 
-    // En producción, esto llamaría a un endpoint que genera el PDF real
-    // Por ahora, creamos un contenido de demostración
-    const content = `
-CERTIFICADO CON FIRMA ELECTRÓNICA
-=====================================
-
-${certificado.titulo.toUpperCase()}
-
-Código de Verificación: ${certificado.codigoVerificacion}
-
-${certificado.descripcion}
-
-Fecha de Emisión: ${certificado.fechaEmision}
-${certificado.fechaVencimiento ? `Fecha de Vencimiento: ${certificado.fechaVencimiento}` : ''}
-
-Entidad Emisora: ${certificado.entidadEmisora}
-
----
-Este documento cuenta con firma electrónica válida.
-Para verificar su autenticidad, visite: https://verificar.movilis.com/${certificado.codigoVerificacion}
-    `;
-
-    return new Blob([content], { type: 'application/pdf' });
+    // Generar el PDF usando el generador con los datos del usuario
+    const pdfBytes = await generateCertificadoPDF(certificado, user);
+    
+    // Convertir Uint8Array a Blob
+    // pdfBytes es un Uint8Array, que es compatible con Blob
+    return new Blob([pdfBytes as unknown as BlobPart], { type: 'application/pdf' });
   },
 
   /**
