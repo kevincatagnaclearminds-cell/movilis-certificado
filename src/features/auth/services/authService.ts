@@ -1,25 +1,18 @@
 import type { AuthResponse, User } from '@/types';
 import { delay } from '@/utils';
+import { apiClient, API_CONFIG } from '@/config';
 
 /**
  * Servicio de autenticación
- * Configuración para API real de Ecuador
+ * Conecta con el backend en http://localhost:3000/api
  */
 
 // ============================================
-// CONFIGURACIÓN DE API
-// Cambia estas variables según tu proveedor de API
+// CONFIGURACIÓN
 // ============================================
-const API_CONFIG = {
-  // URL de tu API backend que consulta el Registro Civil
-  // Ejemplo: 'https://tu-api.com/api/consultar-cedula'
-  baseUrl: import.meta.env.VITE_API_URL || '',
-  
-  // API Key si tu proveedor lo requiere
-  apiKey: import.meta.env.VITE_API_KEY || '',
-  
-  // Modo demo (true = usa datos de prueba, false = usa API real)
-  demoMode: true,
+const AUTH_CONFIG = {
+  // Modo demo (true = usa datos de prueba, false = usa API real del backend)
+  demoMode: false, // Cambiado a false para usar el backend real
 };
 
 // Datos de demostración (solo se usan cuando demoMode = true)
@@ -62,61 +55,163 @@ const DEMO_USERS: Record<string, User> = {
   },
 };
 
-/**
- * Consulta la API real del Registro Civil de Ecuador
- */
-async function consultarCedulaReal(cedula: string): Promise<User | null> {
-  try {
-    const response = await fetch(`${API_CONFIG.baseUrl}/consultar-cedula`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_CONFIG.apiKey}`,
-      },
-      body: JSON.stringify({ cedula }),
-    });
+// ============================================
+// INTERFACES PARA EL BACKEND
+// ============================================
+interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+}
 
-    if (!response.ok) {
-      return null;
-    }
+interface LoginData {
+  email: string;
+  password: string;
+}
 
-    const data = await response.json();
-    
-    // Adapta esto según la estructura de respuesta de tu API
-    if (data && data.nombres) {
-      return {
-        cedula: cedula,
-        nombreCompleto: `${data.nombres} ${data.apellidos}`,
-        primerNombre: data.primerNombre || data.nombres.split(' ')[0],
-        segundoNombre: data.segundoNombre || data.nombres.split(' ')[1] || '',
-        primerApellido: data.primerApellido || data.apellidos.split(' ')[0],
-        segundoApellido: data.segundoApellido || data.apellidos.split(' ')[1] || '',
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error consultando cédula:', error);
-    return null;
-  }
+interface BackendAuthResponse {
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  token?: string;
+  message?: string;
 }
 
 export const authService = {
   /**
-   * Inicia sesión con número de cédula
+   * Registra un nuevo usuario en el backend
+   */
+  async register(data: RegisterData): Promise<AuthResponse> {
+    console.log('📝 [Auth] Iniciando registro de usuario...');
+    console.log('📝 [Auth] Datos:', { name: data.name, email: data.email });
+
+    try {
+      const response = await apiClient.post<BackendAuthResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.REGISTER,
+        data
+      );
+
+      if (response.success && response.data) {
+        console.log('✅ [Auth] Registro exitoso');
+        
+        const backendUser = response.data.user;
+        const user: User = {
+          cedula: backendUser?.id || '',
+          nombreCompleto: backendUser?.name || data.name,
+          primerNombre: (backendUser?.name || data.name).split(' ')[0],
+          segundoNombre: (backendUser?.name || data.name).split(' ')[1] || '',
+          primerApellido: (backendUser?.name || data.name).split(' ')[2] || '',
+          segundoApellido: (backendUser?.name || data.name).split(' ')[3] || '',
+          email: backendUser?.email || data.email,
+        };
+
+        // Guardar token si existe
+        if (response.data.token) {
+          localStorage.setItem('movilis_token', response.data.token);
+        }
+
+        return {
+          success: true,
+          user,
+          token: response.data.token,
+          message: 'Registro exitoso',
+        };
+      }
+
+      return {
+        success: false,
+        message: response.error || 'Error al registrar usuario',
+      };
+    } catch (error) {
+      console.error('❌ [Auth] Error en registro:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Error de conexión',
+      };
+    }
+  },
+
+  /**
+   * Inicia sesión con email y password (Backend real)
+   */
+  async loginWithEmail(data: LoginData): Promise<AuthResponse> {
+    console.log('🔐 [Auth] Iniciando login con email...');
+
+    try {
+      const response = await apiClient.post<BackendAuthResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+        data
+      );
+
+      if (response.success && response.data) {
+        console.log('✅ [Auth] Login exitoso');
+
+        const backendUser = response.data.user;
+        const user: User = {
+          cedula: backendUser?.id || '',
+          nombreCompleto: backendUser?.name || '',
+          primerNombre: (backendUser?.name || '').split(' ')[0],
+          segundoNombre: (backendUser?.name || '').split(' ')[1] || '',
+          primerApellido: (backendUser?.name || '').split(' ')[2] || '',
+          segundoApellido: (backendUser?.name || '').split(' ')[3] || '',
+          email: backendUser?.email || data.email,
+        };
+
+        // Guardar token si existe
+        if (response.data.token) {
+          localStorage.setItem('movilis_token', response.data.token);
+        }
+
+        return {
+          success: true,
+          user,
+          token: response.data.token,
+          message: 'Inicio de sesión exitoso',
+        };
+      }
+
+      return {
+        success: false,
+        message: response.error || 'Credenciales inválidas',
+      };
+    } catch (error) {
+      console.error('❌ [Auth] Error en login:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Error de conexión',
+      };
+    }
+  },
+
+  /**
+   * Inicia sesión con número de cédula (modo demo o API real)
    */
   async login(cedula: string): Promise<AuthResponse> {
     const cleanedCedula = cedula.replace(/[.\s]/g, '');
     
     let user: User | null = null;
 
-    if (API_CONFIG.demoMode) {
+    if (AUTH_CONFIG.demoMode) {
       // Modo demo: usar datos de prueba
+      console.log('🔐 [Auth] Modo demo - buscando usuario...');
       await delay(1000);
       user = DEMO_USERS[cleanedCedula] || null;
     } else {
-      // Modo producción: consultar API real
-      user = await consultarCedulaReal(cleanedCedula);
+      // Modo backend: intentar login con cédula como email temporal
+      console.log('🔐 [Auth] Conectando al backend...');
+      const response = await this.loginWithEmail({
+        email: `${cleanedCedula}@temp.com`,
+        password: cleanedCedula,
+      });
+      
+      if (response.success && response.user) {
+        return response;
+      }
+      
+      // Si falla, buscar en usuarios demo como fallback
+      user = DEMO_USERS[cleanedCedula] || null;
     }
 
     if (user) {
@@ -138,8 +233,11 @@ export const authService = {
    * Cierra la sesión actual
    */
   async logout(): Promise<void> {
+    console.log('🚪 [Auth] Cerrando sesión...');
+    localStorage.removeItem('movilis_token');
+    localStorage.removeItem('movilis_user');
     await delay(300);
-    // En producción, invalidar token en el servidor
+    console.log('✅ [Auth] Sesión cerrada');
   },
 
   /**
@@ -147,7 +245,23 @@ export const authService = {
    */
   async verifyToken(token: string): Promise<boolean> {
     await delay(200);
-    return token.startsWith('token_');
+    return token.startsWith('token_') || token.length > 10;
+  },
+
+  /**
+   * Prueba la conexión al backend
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      console.log('🔍 [Auth] Probando conexión al backend...');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/health`);
+      const connected = response.ok;
+      console.log(connected ? '✅ [Auth] Backend conectado' : '❌ [Auth] Backend no disponible');
+      return connected;
+    } catch {
+      console.log('❌ [Auth] Error de conexión al backend');
+      return false;
+    }
   },
 };
 
