@@ -64,17 +64,26 @@ interface RegisterData {
   password: string;
 }
 
-interface LoginData {
-  email: string;
-  password: string;
-}
-
 interface BackendAuthResponse {
   user?: {
-    id: string;
-    name: string;
-    email: string;
+    id?: string;
+    _id?: string;
+    name?: string;
+    nombre?: string;
+    nombreCompleto?: string;
+    email?: string;
+    correo?: string;
+    cedula?: string;
   };
+  // El backend puede devolver el usuario directamente sin envolverlo en "user"
+  id?: string;
+  _id?: string;
+  name?: string;
+  nombre?: string;
+  nombreCompleto?: string;
+  email?: string;
+  correo?: string;
+  cedula?: string;
   token?: string;
   message?: string;
 }
@@ -134,47 +143,69 @@ export const authService = {
   },
 
   /**
-   * Inicia sesión con email y password (Backend real)
+   * Inicia sesión con cédula (Backend real)
    */
-  async loginWithEmail(data: LoginData): Promise<AuthResponse> {
-    console.log('🔐 [Auth] Iniciando login con email...');
+  async loginWithCedula(cedula: string): Promise<AuthResponse> {
+    console.log('🔐 [Auth] Iniciando login con cédula:', cedula);
 
     try {
       const response = await apiClient.post<BackendAuthResponse>(
         API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-        data
+        { cedula }
       );
+
+      // Mostrar exactamente qué devuelve el backend
+      console.log('📦 [Auth] Respuesta completa del backend:', response);
+      console.log('📦 [Auth] response.data:', response.data);
 
       if (response.success && response.data) {
         console.log('✅ [Auth] Login exitoso');
 
-        const backendUser = response.data.user;
+        const data = response.data;
+        // El usuario puede venir en data.user o directamente en data
+        const backendUser = data.user || data;
+        
+        console.log('👤 [Auth] Datos del usuario del backend:', backendUser);
+
+        // Extraer nombre (probar varios campos posibles)
+        const nombre = backendUser?.name || backendUser?.nombre || backendUser?.nombreCompleto || '';
+        // Extraer email (probar varios campos posibles)
+        const email = backendUser?.email || backendUser?.correo || '';
+        // Extraer cédula (probar varios campos posibles)
+        const userCedula = backendUser?.cedula || backendUser?.id || backendUser?._id || cedula;
+
+        console.log('📝 [Auth] Nombre extraído:', nombre);
+        console.log('📝 [Auth] Email extraído:', email);
+        console.log('📝 [Auth] Cédula extraída:', userCedula);
+
         const user: User = {
-          cedula: backendUser?.id || '',
-          nombreCompleto: backendUser?.name || '',
-          primerNombre: (backendUser?.name || '').split(' ')[0],
-          segundoNombre: (backendUser?.name || '').split(' ')[1] || '',
-          primerApellido: (backendUser?.name || '').split(' ')[2] || '',
-          segundoApellido: (backendUser?.name || '').split(' ')[3] || '',
-          email: backendUser?.email || data.email,
+          cedula: String(userCedula),
+          nombreCompleto: nombre,
+          primerNombre: nombre.split(' ')[0] || '',
+          segundoNombre: nombre.split(' ')[1] || '',
+          primerApellido: nombre.split(' ')[2] || '',
+          segundoApellido: nombre.split(' ')[3] || '',
+          email: email,
         };
 
+        console.log('👤 [Auth] Usuario final mapeado:', user);
+
         // Guardar token si existe
-        if (response.data.token) {
-          localStorage.setItem('movilis_token', response.data.token);
+        if (data.token) {
+          localStorage.setItem('movilis_token', data.token);
         }
 
         return {
           success: true,
           user,
-          token: response.data.token,
+          token: data.token,
           message: 'Inicio de sesión exitoso',
         };
       }
 
       return {
         success: false,
-        message: response.error || 'Credenciales inválidas',
+        message: response.error || 'Cédula no encontrada',
       };
     } catch (error) {
       console.error('❌ [Auth] Error en login:', error);
@@ -191,42 +222,30 @@ export const authService = {
   async login(cedula: string): Promise<AuthResponse> {
     const cleanedCedula = cedula.replace(/[.\s]/g, '');
     
-    let user: User | null = null;
-
     if (AUTH_CONFIG.demoMode) {
       // Modo demo: usar datos de prueba
       console.log('🔐 [Auth] Modo demo - buscando usuario...');
       await delay(1000);
-      user = DEMO_USERS[cleanedCedula] || null;
-    } else {
-      // Modo backend: intentar login con cédula como email temporal
-      console.log('🔐 [Auth] Conectando al backend...');
-      const response = await this.loginWithEmail({
-        email: `${cleanedCedula}@temp.com`,
-        password: cleanedCedula,
-      });
+      const user = DEMO_USERS[cleanedCedula] || null;
       
-      if (response.success && response.user) {
-        return response;
+      if (user) {
+        return {
+          success: true,
+          user,
+          token: `token_${Date.now()}`,
+          message: 'Inicio de sesión exitoso',
+        };
       }
       
-      // Si falla, buscar en usuarios demo como fallback
-      user = DEMO_USERS[cleanedCedula] || null;
-    }
-
-    if (user) {
       return {
-        success: true,
-        user,
-        token: `token_${Date.now()}`,
-        message: 'Inicio de sesión exitoso',
+        success: false,
+        message: 'Cédula no encontrada',
       };
     }
-
-    return {
-      success: false,
-      message: 'Cédula no encontrada',
-    };
+    
+    // Modo backend: enviar solo la cédula
+    console.log('🔐 [Auth] Conectando al backend con cédula:', cleanedCedula);
+    return await this.loginWithCedula(cleanedCedula);
   },
 
   /**

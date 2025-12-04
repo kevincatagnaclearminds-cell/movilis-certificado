@@ -19,21 +19,19 @@ testBackendConnection().then((connected) => {
 });
 
 // ============================================
-// Función para probar el registro (solo desarrollo)
+// Función para probar el login con cédula (solo desarrollo)
 // ============================================
-async function testRegisterConnection() {
-  console.log('🧪 [Test] Probando conexión al endpoint de registro...');
+async function testLoginConnection() {
+  console.log('🧪 [Test] Probando conexión al endpoint de login con cédula...');
   
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        name: "Usuario Test",
-        email: "test@example.com",
-        password: "123456"
+        cedula: "1067890123"
       })
     });
     
@@ -54,8 +52,8 @@ async function testRegisterConnection() {
   }
 }
 
-// Ejecutar test de registro al cargar (comentar en producción)
-testRegisterConnection();
+// Ejecutar test de login al cargar (comentar en producción)
+testLoginConnection();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

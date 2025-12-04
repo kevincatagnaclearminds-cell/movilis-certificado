@@ -27,38 +27,36 @@ async function testHealthConnection() {
   }
 }
 
-// Probar registro
-async function testRegisterConnection() {
+// Probar login con cédula
+async function testLoginConnection() {
   console.log('');
-  console.log('🧪 [Test] Probando endpoint de registro...');
+  console.log('🧪 [Test] Probando endpoint de login con cédula...');
   
   try {
-    const response = await fetch(`${API_URL}/auth/register`, {
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        name: "Usuario Test",
-        email: "test@example.com",
-        password: "123456"
+        cedula: "1067890123"
       })
     });
     
     const data = await response.json();
     
     if (response.ok) {
-      console.log('✅ [Registro] ¡Conexión exitosa!');
-      console.log('✅ [Registro] Respuesta:', JSON.stringify(data, null, 2));
+      console.log('✅ [Login] ¡Conexión exitosa!');
+      console.log('✅ [Login] Respuesta:', JSON.stringify(data, null, 2));
     } else {
-      console.log('⚠️ [Registro] Backend conectado pero respondió con error:');
+      console.log('⚠️ [Login] Backend conectado pero respondió con error:');
       console.log('   Status:', response.status);
       console.log('   Mensaje:', data.message || data.error || 'Sin mensaje');
     }
     
     return true;
   } catch (error) {
-    console.log('❌ [Registro] Error de conexión:', error.message);
+    console.log('❌ [Login] Error de conexión:', error.message);
     return false;
   }
 }
@@ -66,11 +64,11 @@ async function testRegisterConnection() {
 // Ejecutar tests
 async function runTests() {
   const healthOk = await testHealthConnection();
-  const registerOk = await testRegisterConnection();
+  const loginOk = await testLoginConnection();
   
   console.log('');
   console.log('═══════════════════════════════════════════');
-  if (healthOk || registerOk) {
+  if (healthOk || loginOk) {
     console.log('✅ RESULTADO: Backend CONECTADO');
   } else {
     console.log('❌ RESULTADO: Backend NO DISPONIBLE');
