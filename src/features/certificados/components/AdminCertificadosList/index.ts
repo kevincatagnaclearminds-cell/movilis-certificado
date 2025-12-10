@@ -1,0 +1,2 @@
+export { AdminCertificadosList } from './AdminCertificadosList';
+

@@ -59,9 +59,9 @@ const DEMO_USERS: Record<string, User> = {
 // INTERFACES PARA EL BACKEND
 // ============================================
 interface RegisterData {
+  cedula: string;
   name: string;
-  email: string;
-  password: string;
+  email?: string;
 }
 
 interface LoginData {
@@ -71,9 +71,11 @@ interface LoginData {
 
 interface BackendAuthResponse {
   user?: {
-    id: string;
+    id?: string;
+    cedula?: string;
     name: string;
-    email: string;
+    email?: string;
+    role?: string;
   };
   token?: string;
   message?: string;
@@ -85,12 +87,16 @@ export const authService = {
    */
   async register(data: RegisterData): Promise<AuthResponse> {
     console.log('📝 [Auth] Iniciando registro de usuario...');
-    console.log('📝 [Auth] Datos:', { name: data.name, email: data.email });
+    console.log('📝 [Auth] Datos:', { cedula: data.cedula, name: data.name, email: data.email });
 
     try {
       const response = await apiClient.post<BackendAuthResponse>(
         API_CONFIG.ENDPOINTS.AUTH.REGISTER,
-        data
+        {
+          cedula: data.cedula,
+          name: data.name,
+          email: data.email
+        }
       );
 
       if (response.success && response.data) {
@@ -98,13 +104,14 @@ export const authService = {
         
         const backendUser = response.data.user;
         const user: User = {
-          cedula: backendUser?.id || '',
+          cedula: backendUser?.cedula || data.cedula,
           nombreCompleto: backendUser?.name || data.name,
           primerNombre: (backendUser?.name || data.name).split(' ')[0],
           segundoNombre: (backendUser?.name || data.name).split(' ')[1] || '',
           primerApellido: (backendUser?.name || data.name).split(' ')[2] || '',
           segundoApellido: (backendUser?.name || data.name).split(' ')[3] || '',
-          email: backendUser?.email || data.email,
+          email: backendUser?.email || data.email || '',
+          role: (backendUser?.role as 'admin' | 'user' | 'issuer' | undefined) || undefined,
         };
 
         // Guardar token si existe
@@ -150,13 +157,14 @@ export const authService = {
 
         const backendUser = response.data.user;
         const user: User = {
-          cedula: backendUser?.id || '',
+          cedula: backendUser?.cedula || backendUser?.id || '',
           nombreCompleto: backendUser?.name || '',
           primerNombre: (backendUser?.name || '').split(' ')[0],
           segundoNombre: (backendUser?.name || '').split(' ')[1] || '',
           primerApellido: (backendUser?.name || '').split(' ')[2] || '',
           segundoApellido: (backendUser?.name || '').split(' ')[3] || '',
           email: backendUser?.email || data.email,
+          role: (backendUser?.role as 'admin' | 'user' | 'issuer' | undefined) || undefined,
         };
 
         // Guardar token si existe
@@ -199,15 +207,65 @@ export const authService = {
       await delay(1000);
       user = DEMO_USERS[cleanedCedula] || null;
     } else {
-      // Modo backend: intentar login con cédula como email temporal
-      console.log('🔐 [Auth] Conectando al backend...');
-      const response = await this.loginWithEmail({
-        email: `${cleanedCedula}@temp.com`,
-        password: cleanedCedula,
-      });
-      
-      if (response.success && response.user) {
-        return response;
+      // Modo backend: enviar cédula directamente al backend
+      console.log('🔐 [Auth] Conectando al backend con cédula...');
+      try {
+        const response = await apiClient.post<BackendAuthResponse>(
+          API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+          { cedula: cleanedCedula }
+        );
+
+        if (response.success && response.data) {
+          console.log('✅ [Auth] Login exitoso con backend');
+          
+          // El backend devuelve: { success: true, data: { user: {...}, token: "..." } }
+          // El apiClient envuelve esto en: { success: true, data: { success: true, data: {...} } }
+          const backendResponse = response.data as any;
+          const backendData = backendResponse.data || backendResponse;
+          const backendUser = backendData.user;
+          
+          if (!backendUser) {
+            console.error('❌ [Auth] No se encontró el usuario en la respuesta:', backendResponse);
+            throw new Error('Usuario no encontrado en la respuesta del servidor');
+          }
+
+          user = {
+            cedula: backendUser.cedula || cleanedCedula,
+            nombreCompleto: backendUser.name || backendUser.nombreCompleto || '',
+            primerNombre: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[0],
+            segundoNombre: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[1] || '',
+            primerApellido: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[2] || '',
+            segundoApellido: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[3] || '',
+            email: backendUser.email,
+            role: backendUser.role,
+          };
+          
+          const userData: User = {
+            cedula: backendUser.cedula || cleanedCedula,
+            nombreCompleto: backendUser.name || backendUser.nombreCompleto || '',
+            primerNombre: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[0],
+            segundoNombre: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[1] || '',
+            primerApellido: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[2] || '',
+            segundoApellido: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[3] || '',
+            email: backendUser.email || '',
+            role: backendUser.role,
+          };
+
+          // Guardar token si existe
+          const token = backendData.token;
+          if (token) {
+            localStorage.setItem('movilis_token', token);
+          }
+
+          return {
+            success: true,
+            user: userData,
+            token: token,
+            message: 'Inicio de sesión exitoso',
+          };
+        }
+      } catch (error) {
+        console.error('❌ [Auth] Error en login con backend:', error);
       }
       
       // Si falla, buscar en usuarios demo como fallback

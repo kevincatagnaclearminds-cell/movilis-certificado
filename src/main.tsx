@@ -24,6 +24,9 @@ testBackendConnection().then((connected) => {
 async function testRegisterConnection() {
   console.log('🧪 [Test] Probando conexión al endpoint de registro...');
   
+  // Usar una cédula única para evitar conflictos
+  const uniqueCedula = `TEST${Date.now()}`;
+  
   try {
     const response = await fetch(`${API_CONFIG.BASE_URL}/auth/register`, {
       method: "POST",
@@ -31,9 +34,9 @@ async function testRegisterConnection() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
+        cedula: uniqueCedula,
         name: "Usuario Test",
-        email: "test@example.com",
-        password: "123456"
+        email: `test${Date.now()}@example.com`
       })
     });
     
@@ -41,9 +44,12 @@ async function testRegisterConnection() {
     
     if (response.ok) {
       console.log('✅ [Test] ¡Conexión al backend exitosa!');
-      console.log('✅ [Test] Respuesta del servidor:', data);
+      console.log('✅ [Test] Usuario de prueba registrado:', data);
+    } else if (response.status === 409) {
+      // 409 = Conflict (usuario ya existe) - esto es normal si se ejecuta varias veces
+      console.log('ℹ️ [Test] Usuario ya existe (409) - Backend está funcionando correctamente');
     } else {
-      console.log('⚠️ [Test] Backend respondió con error (pero está conectado):', data);
+      console.log('⚠️ [Test] Backend respondió con error:', data);
     }
     
     return data;
@@ -55,7 +61,7 @@ async function testRegisterConnection() {
 }
 
 // Ejecutar test de registro al cargar (comentar en producción)
-testRegisterConnection();
+// testRegisterConnection(); // Comentado para evitar spam en consola
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

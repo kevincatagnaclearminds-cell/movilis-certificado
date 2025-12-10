@@ -26,7 +26,7 @@ export const useCertificados = (): UseCertificadosReturn => {
     setError(null);
 
     try {
-      const response = await certificadosService.getCertificados(user.cedula);
+      const response = await certificadosService.getCertificados(user.cedula, user.email);
       
       if (response.success) {
         setCertificados(response.certificados);
@@ -39,7 +39,7 @@ export const useCertificados = (): UseCertificadosReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.cedula]);
+  }, [user?.cedula, user?.email]);
 
   const downloadCertificado = useCallback(async (certificado: Certificado) => {
     if (!user) {
@@ -50,7 +50,7 @@ export const useCertificados = (): UseCertificadosReturn => {
     setDownloadingId(certificado.id);
 
     try {
-      const blob = await certificadosService.downloadCertificado(certificado, user);
+      const blob = await certificadosService.downloadCertificado(certificado);
       
       // Crear URL temporal y descargar
       const url = window.URL.createObjectURL(blob);

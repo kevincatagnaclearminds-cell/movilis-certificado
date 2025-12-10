@@ -13,6 +13,9 @@
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(139, 26, 122, 0.4);
   border: 2px solid rgba(245, 184, 0, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .welcomeContent {
@@ -42,6 +45,30 @@
   font-size: 0.9375rem;
   color: rgba(255, 255, 255, 0.8);
   margin: 0;
+}
+
+.adminActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.createButton {
+  background: var(--color-accent);
+  color: var(--color-primary);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(245, 184, 0, 0.3);
+}
+
+.createButton:hover {
+  background: #f5b800;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 184, 0, 0.4);
 }
 
 .welcomeDecoration {

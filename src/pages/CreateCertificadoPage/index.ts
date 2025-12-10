@@ -1,0 +1,2 @@
+export { CreateCertificadoPage } from './CreateCertificadoPage';
+

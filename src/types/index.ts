@@ -14,6 +14,7 @@ export interface User {
   segundoApellido?: string;
   email?: string;
   telefono?: string;
+  role?: 'admin' | 'user' | 'issuer';
 }
 
 /**
@@ -48,6 +49,25 @@ export interface Certificado {
   urlDescarga?: string;
   firmado: boolean;
   metadata?: Record<string, unknown>;
+  // Información del usuario propietario (para vista admin)
+  recipientName?: string;
+  recipientEmail?: string;
+  recipientCedula?: string;
+  // Usuarios asignados (para relación muchos-a-muchos)
+  assignedUsers?: Array<{
+    id: string;
+    _id: string;
+    name: string;
+    email?: string;
+    cedula?: string;
+  }>;
+  usuariosAsignados?: Array<{
+    id: string;
+    _id: string;
+    name: string;
+    email?: string;
+    cedula?: string;
+  }>;
 }
 
 /**

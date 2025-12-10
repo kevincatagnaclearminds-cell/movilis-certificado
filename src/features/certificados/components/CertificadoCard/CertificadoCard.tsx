@@ -8,7 +8,8 @@ import {
   GraduationCap,
   Award,
   Trophy,
-  FileText
+  FileText,
+  User
 } from 'lucide-react';
 import { Card, Button, Badge } from '@/components/ui';
 import type { Certificado, CertificadoTipo, CertificadoEstado } from '@/types';
@@ -19,6 +20,7 @@ interface CertificadoCardProps {
   certificado: Certificado;
   onDownload: (certificado: Certificado) => void;
   isDownloading?: boolean;
+  showDownloadButton?: boolean;
 }
 
 const TIPO_ICONS: Record<CertificadoTipo, React.ReactNode> = {
@@ -65,7 +67,8 @@ const ESTADO_LABELS: Record<CertificadoEstado, string> = {
 export const CertificadoCard = ({ 
   certificado, 
   onDownload, 
-  isDownloading = false 
+  isDownloading = false,
+  showDownloadButton = true
 }: CertificadoCardProps) => {
   const tipoColor = TIPO_COLORS[certificado.tipo];
 
@@ -91,6 +94,30 @@ export const CertificadoCard = ({
       <div className={styles.body}>
         {certificado.descripcion && (
           <p className={styles.description}>{certificado.descripcion}</p>
+        )}
+
+        {(certificado.recipientName || certificado.recipientEmail || certificado.recipientCedula) && (
+          <div className={styles.userInfo}>
+            <div className={styles.userLabel}>Propietario:</div>
+            {certificado.recipientName && (
+              <div className={styles.metaItem}>
+                <User size={16} />
+                <span>{certificado.recipientName}</span>
+              </div>
+            )}
+            {certificado.recipientCedula && (
+              <div className={styles.metaItem}>
+                <User size={16} />
+                <span>C.C. {certificado.recipientCedula}</span>
+              </div>
+            )}
+            {certificado.recipientEmail && (
+              <div className={styles.metaItem}>
+                <User size={16} />
+                <span>{certificado.recipientEmail}</span>
+              </div>
+            )}
+          </div>
         )}
 
         <div className={styles.metadata}>
@@ -122,16 +149,18 @@ export const CertificadoCard = ({
             <span>Firmado electrónicamente</span>
           </div>
         )}
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => onDownload(certificado)}
-          isLoading={isDownloading}
-          leftIcon={!isDownloading ? <Download size={16} /> : undefined}
-          disabled={certificado.estado === 'revocado'}
-        >
-          {isDownloading ? 'Descargando...' : 'Descargar PDF'}
-        </Button>
+        {showDownloadButton && (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => onDownload(certificado)}
+            isLoading={isDownloading}
+            leftIcon={!isDownloading ? <Download size={16} /> : undefined}
+            disabled={certificado.estado === 'revocado'}
+          >
+            {isDownloading ? 'Descargando...' : 'Descargar PDF'}
+          </Button>
+        )}
       </div>
     </Card>
   );

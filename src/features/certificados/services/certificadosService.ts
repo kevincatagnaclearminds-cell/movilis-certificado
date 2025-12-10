@@ -1,13 +1,13 @@
-import type { Certificado, CertificadosResponse, User } from '@/types';
+import type { Certificado, CertificadosResponse } from '@/types';
 import { delay } from '@/utils';
-import { generateCertificadoPDF } from '../utils/pdfGenerator';
+import { API_CONFIG } from '@/config';
 
 /**
  * Servicio de certificados
- * En producción, estas funciones llamarían a tu API real
+ * En producción, estas funciones llaman a la API real del backend
  */
 
-// Datos de demostración
+// Datos de demostración (usados como fallback si el backend no está disponible)
 const DEMO_CERTIFICADOS: Record<string, Certificado[]> = {
   '1234567890': [
     {
@@ -116,20 +116,73 @@ const GENERIC_CERTIFICADOS: Certificado[] = [
 
 export const certificadosService = {
   /**
-   * Obtiene los certificados de un usuario por cédula
+   * Obtiene los certificados de un usuario desde el backend
    */
-  async getCertificados(cedula: string): Promise<CertificadosResponse> {
-    // Simular delay de red
-    await delay(800);
+  async getCertificados(cedula: string, userEmail?: string): Promise<CertificadosResponse> {
+    try {
+      // Si hay email del usuario, usar el endpoint del backend
+      if (userEmail) {
+        const token = localStorage.getItem('movilis_token');
+        const response = await fetch(
+          `${API_CONFIG.BASE_URL}/certificados/recipient?email=${encodeURIComponent(userEmail)}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
-    const cleanedCedula = cedula.replace(/[.\s]/g, '');
-    const certificados = DEMO_CERTIFICADOS[cleanedCedula] || GENERIC_CERTIFICADOS;
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            // Transformar los datos del backend al formato del frontend
+            const certificados = data.data.map((cert: any) => ({
+              id: cert._id || cert.id,
+              tipo: 'capacitacion', // Tipo por defecto, ajustar según necesidad
+              titulo: cert.courseName || 'Certificado',
+              descripcion: cert.courseDescription || '',
+              fechaEmision: cert.issueDate ? new Date(cert.issueDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              fechaVencimiento: cert.expirationDate ? new Date(cert.expirationDate).toISOString().split('T')[0] : undefined,
+              estado: cert.status === 'issued' ? 'vigente' : cert.status,
+              entidadEmisora: 'Movilis',
+              codigoVerificacion: cert.verificationCode || cert.certificateNumber,
+              firmado: cert.status === 'issued',
+            }));
 
-    return {
-      success: true,
-      certificados,
-      total: certificados.length,
-    };
+            return {
+              success: true,
+              certificados,
+              total: certificados.length,
+            };
+          }
+        }
+      }
+
+      // Fallback a datos demo si no hay email o falla la conexión
+      await delay(800);
+      const cleanedCedula = cedula.replace(/[.\s]/g, '');
+      const certificados = DEMO_CERTIFICADOS[cleanedCedula] || GENERIC_CERTIFICADOS;
+
+      return {
+        success: true,
+        certificados,
+        total: certificados.length,
+      };
+    } catch (error) {
+      console.error('Error obteniendo certificados:', error);
+      // Fallback a datos demo en caso de error
+      await delay(800);
+      const cleanedCedula = cedula.replace(/[.\s]/g, '');
+      const certificados = DEMO_CERTIFICADOS[cleanedCedula] || GENERIC_CERTIFICADOS;
+
+      return {
+        success: true,
+        certificados,
+        total: certificados.length,
+      };
+    }
   },
 
   /**
@@ -148,17 +201,48 @@ export const certificadosService = {
   },
 
   /**
-   * Descarga un certificado (genera un PDF usando la plantilla)
+   * Descarga un certificado desde el backend
    */
-  async downloadCertificado(certificado: Certificado, user: User): Promise<Blob> {
-    await delay(1500);
+  async downloadCertificado(certificado: Certificado): Promise<Blob> {
+    try {
+      const certificateId = certificado.id;
+      
+      if (!certificateId) {
+        throw new Error('ID de certificado no disponible');
+      }
 
-    // Generar el PDF usando el generador con los datos del usuario
-    const pdfBytes = await generateCertificadoPDF(certificado, user);
-    
-    // Convertir Uint8Array a Blob
-    // pdfBytes es un Uint8Array, que es compatible con Blob
-    return new Blob([pdfBytes as unknown as BlobPart], { type: 'application/pdf' });
+      // Convertir ID a string si es número (PostgreSQL usa SERIAL)
+      const idString = String(certificateId);
+      
+      // Verificar si es un ID de demo (solo si parece ser un string de demo)
+      if (idString.startsWith('cert-demo-')) {
+        throw new Error('Los certificados de demostración no se pueden descargar. Por favor, crea un certificado real desde el sistema.');
+      }
+
+      // Llamar al endpoint del backend para descargar el PDF
+      const token = localStorage.getItem('movilis_token');
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/certificados/${certificateId}/download`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `Error al descargar certificado: ${response.statusText}`);
+      }
+
+      // El backend devuelve el PDF directamente
+      const blob = await response.blob();
+      return blob;
+    } catch (error) {
+      console.error('Error descargando certificado:', error);
+      throw error;
+    }
   },
 
   /**
@@ -171,6 +255,143 @@ export const certificadosService = {
            codigoVerificacion.startsWith('SENA-') ||
            codigoVerificacion.startsWith('ISI-') ||
            codigoVerificacion.startsWith('ACT-');
+  },
+
+  /**
+   * Crea un nuevo certificado
+   */
+  async createCertificado(certificadoData: {
+    courseName: string;
+    institucion?: string;
+    destinatarioId: string;
+    courseDescription?: string;
+    expirationDate?: string;
+  }): Promise<any> {
+    try {
+      const token = localStorage.getItem('movilis_token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/certificados/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          courseName: certificadoData.courseName,
+          institucion: certificadoData.institucion || 'Movilis',
+          destinatarioId: certificadoData.destinatarioId,
+          courseDescription: certificadoData.courseDescription || '',
+          ...(certificadoData.expirationDate && { expirationDate: certificadoData.expirationDate }),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error?.message || errorData.error?.errors?.[0]?.msg || `Error al crear certificado: ${response.statusText}`;
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error creando certificado:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtiene todos los certificados (solo admin)
+   */
+  async getAllCertificados(options: { page?: number; limit?: number; status?: string } = {}): Promise<CertificadosResponse> {
+    try {
+      const token = localStorage.getItem('movilis_token');
+      const queryParams = new URLSearchParams();
+      if (options.page) queryParams.append('page', options.page.toString());
+      if (options.limit) queryParams.append('limit', options.limit.toString());
+      if (options.status) queryParams.append('status', options.status);
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}/certificados?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al obtener certificados: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        const certificados = data.data.map((cert: any) => ({
+          id: cert._id || cert.id,
+          tipo: 'capacitacion',
+          titulo: cert.courseName || 'Certificado',
+          descripcion: cert.courseDescription || '',
+          fechaEmision: cert.issueDate ? new Date(cert.issueDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          fechaVencimiento: cert.expirationDate ? new Date(cert.expirationDate).toISOString().split('T')[0] : undefined,
+          estado: cert.status === 'issued' ? 'vigente' : cert.status,
+          entidadEmisora: cert.institucion || 'Movilis',
+          codigoVerificacion: cert.verificationCode || cert.certificateNumber,
+          firmado: cert.status === 'issued',
+          recipientName: cert.recipientName,
+          recipientEmail: cert.recipientEmail,
+          issuerName: cert.issuerName,
+          // Usuarios asignados (para relación muchos-a-muchos)
+          assignedUsers: cert.assignedUsers || cert.usuariosAsignados || [],
+          usuariosAsignados: cert.usuariosAsignados || cert.assignedUsers || [],
+        }));
+
+        return {
+          success: true,
+          certificados,
+          total: data.pagination?.total || certificados.length,
+        };
+      }
+
+      return {
+        success: true,
+        certificados: [],
+        total: 0,
+      };
+    } catch (error) {
+      console.error('Error obteniendo todos los certificados:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Actualiza un certificado (solo admin)
+   */
+  async updateCertificado(certificadoId: string, updateData: {
+    destinatarioId?: string;
+    courseName?: string;
+    institucion?: string;
+    expirationDate?: string;
+    status?: string;
+  }): Promise<any> {
+    try {
+      const token = localStorage.getItem('movilis_token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/certificados/${certificadoId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `Error al actualizar certificado: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error actualizando certificado:', error);
+      throw error;
+    }
   },
 };
 

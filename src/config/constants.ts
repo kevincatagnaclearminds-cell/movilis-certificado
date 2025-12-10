@@ -35,6 +35,8 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   CERTIFICADOS: '/certificados',
   CERTIFICADO_DETALLE: '/certificados/:id',
+  CREAR_CERTIFICADO: '/certificados/crear',
+  CREAR_USUARIO: '/usuarios/crear',
 } as const;
 
 /**
