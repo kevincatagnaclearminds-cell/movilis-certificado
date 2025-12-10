@@ -73,7 +73,7 @@ fetch("http://localhost:3000/api/auth/register", {
 
 ---
 
-### 2. Iniciar Sesión (con Email)
+### 2. Iniciar Sesión (con Cédula)
 
 ```
 POST /api/auth/login
@@ -86,15 +86,7 @@ POST /api/auth/login
 }
 ```
 
-**Body (Request) - Opción 1: Email y Password:**
-```json
-{
-  "email": "string",
-  "password": "string"
-}
-```
-
-**Body (Request) - Opción 2: Solo Cédula:**
+**Body (Request):**
 ```json
 {
   "cedula": "string"    // Número de cédula (6-12 dígitos)
@@ -107,8 +99,8 @@ POST /api/auth/login
   "user": {
     "id": "string",
     "name": "string",
-    "email": "string",
-    "cedula": "string"
+    "cedula": "string",
+    "email": "string"    // Opcional
   },
   "token": "string",     // JWT Token
   "message": "Inicio de sesión exitoso"
@@ -118,17 +110,17 @@ POST /api/auth/login
 **Response (401 - Error):**
 ```json
 {
-  "message": "Credenciales inválidas",
+  "message": "Cédula no encontrada",
   "error": "string"
 }
 ```
 
-**Ejemplo fetch con cédula:**
+**Ejemplo fetch:**
 ```javascript
 fetch("http://localhost:3000/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cedula: "1023456789" })
+    body: JSON.stringify({ cedula: "1067890123" })
 })
 .then(res => res.json())
 .then(data => console.log(data));
