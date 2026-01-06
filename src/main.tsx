@@ -8,7 +8,8 @@ import { testBackendConnection } from '@/config';
 // Probar conexión al backend al iniciar
 // ============================================
 console.log('🚀 [Movilis] Iniciando aplicación...');
-console.log('🔌 [Movilis] Conectando al backend: http://localhost:3000/api');
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+console.log('🔌 [Movilis] Conectando al backend:', apiUrl);
 
 testBackendConnection().then((connected) => {
   if (connected) {

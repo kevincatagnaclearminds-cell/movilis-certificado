@@ -7,10 +7,14 @@
  */
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-// Debug: Ver qué URL se está usando (solo en desarrollo o si no está configurada)
-if (import.meta.env.DEV || !import.meta.env.VITE_API_URL) {
-  console.log('🔌 [API Config] VITE_API_URL:', import.meta.env.VITE_API_URL);
-  console.log('🔌 [API Config] BASE_URL final:', BASE_URL);
+// Debug: Ver qué URL se está usando (siempre visible para debugging)
+console.log('🔌 [API Config] VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('🔌 [API Config] BASE_URL final:', BASE_URL);
+
+// Advertencia si no está configurada en producción
+if (!import.meta.env.VITE_API_URL && import.meta.env.PROD) {
+  console.error('❌ [API Config] ADVERTENCIA: VITE_API_URL no está configurada en Vercel!');
+  console.error('❌ [API Config] Ve a Settings > Environment Variables y agrega VITE_API_URL');
 }
 
 export const API_CONFIG = {
