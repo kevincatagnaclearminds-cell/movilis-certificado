@@ -7,6 +7,7 @@ export interface BackendUser {
   email: string;
   cedula: string;
   role: 'admin' | 'user' | 'issuer';
+  isActive?: boolean;
 }
 
 export interface UsersResponse {

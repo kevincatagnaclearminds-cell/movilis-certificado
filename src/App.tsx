@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/features/auth';
-import { LoginPage, DashboardPage, CreateCertificadoPage, CreateUserPage } from '@/pages';
+import { LoginPage, DashboardPage, CreateCertificadoPage, CreateUserPage, CreateCertificadoQuickPage } from '@/pages';
 import { ROUTES } from '@/config';
 import { useAuth } from '@/features/auth';
 
@@ -44,6 +44,14 @@ function App() {
             element={
               <AdminRoute>
                 <CreateUserPage />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path={ROUTES.CREAR_CERTIFICADO_RAPIDO} 
+            element={
+              <AdminRoute>
+                <CreateCertificadoQuickPage />
               </AdminRoute>
             } 
           />

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui';
 import { usersService } from '@/features/users/services/usersService';
-import { certificadosService } from '../../services/certificadosService';
 import type { BackendUser } from '@/features/users/services/usersService';
 import type { Certificado } from '@/types';
 import styles from './AssignCertificateModal.module.css';
@@ -125,7 +124,7 @@ export const AssignCertificateModal = ({
 
         <div className={styles.content}>
           <div className={styles.certificateInfo}>
-            <p><strong>Certificado:</strong> {certificado.titulo || certificado.courseName}</p>
+            <p><strong>Certificado:</strong> {certificado.titulo}</p>
             <p><strong>Número:</strong> {certificado.codigoVerificacion}</p>
             {assignedUsers.length > 0 && (
               <p><strong>Usuarios asignados actualmente:</strong> {assignedUsers.map(u => u.name).join(', ')}</p>

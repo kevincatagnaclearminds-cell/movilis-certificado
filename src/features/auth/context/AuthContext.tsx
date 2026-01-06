@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('movilis_user');
+    localStorage.removeItem('movilis_token');
   }, []);
 
   const clearError = useCallback(() => {

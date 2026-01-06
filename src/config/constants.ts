@@ -36,6 +36,7 @@ export const ROUTES = {
   CERTIFICADOS: '/certificados',
   CERTIFICADO_DETALLE: '/certificados/:id',
   CREAR_CERTIFICADO: '/certificados/crear',
+  CREAR_CERTIFICADO_RAPIDO: '/certificados/crear-rapido',
   CREAR_USUARIO: '/usuarios/crear',
 } as const;
 

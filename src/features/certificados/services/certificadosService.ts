@@ -299,6 +299,61 @@ export const certificadosService = {
   },
 
   /**
+   * Crea un certificado de forma rápida (endpoint /quick)
+   * Permite asignar a un único destinatario o a múltiples usuarios (userIds).
+   */
+  async createCertificadoQuick(certificadoData: {
+    courseName: string;
+    institucion?: string;
+    destinatarioId?: string;
+    userIds?: string[];
+    courseDescription?: string;
+    expirationDate?: string;
+  }): Promise<any> {
+    try {
+      const token = localStorage.getItem('movilis_token');
+      const payload: Record<string, unknown> = {
+        courseName: certificadoData.courseName,
+        institucion: certificadoData.institucion || 'Movilis',
+      };
+
+      if (certificadoData.destinatarioId) {
+        payload.destinatarioId = certificadoData.destinatarioId;
+      }
+      if (certificadoData.userIds && certificadoData.userIds.length > 0) {
+        payload.userIds = certificadoData.userIds;
+      }
+      if (certificadoData.courseDescription) {
+        payload.courseDescription = certificadoData.courseDescription;
+      }
+      if (certificadoData.expirationDate) {
+        payload.expirationDate = certificadoData.expirationDate;
+      }
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}/certificados/quick`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error?.message || errorData.error?.errors?.[0]?.msg || `Error al crear certificado (rápido): ${response.statusText}`;
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error creando certificado (rápido):', error);
+      throw error;
+    }
+  },
+
+  /**
    * Obtiene todos los certificados (solo admin)
    */
   async getAllCertificados(options: { page?: number; limit?: number; status?: string } = {}): Promise<CertificadosResponse> {

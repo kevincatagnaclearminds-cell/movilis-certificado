@@ -64,24 +64,20 @@ interface RegisterData {
   email?: string;
 }
 
+interface BackendUserData {
+  id?: string;
+  _id?: string;
+  cedula?: string;
+  name?: string;
+  nombre?: string;
+  nombreCompleto?: string;
+  email?: string;
+  correo?: string;
+  role?: string;
+}
+
 interface BackendAuthResponse {
-  user?: {
-    id?: string;
-<<<<<<< HEAD
-    cedula?: string;
-    name: string;
-    email?: string;
-    role?: string;
-=======
-    _id?: string;
-    name?: string;
-    nombre?: string;
-    nombreCompleto?: string;
-    email?: string;
-    correo?: string;
-    cedula?: string;
->>>>>>> 745fdb5aed72aefc4a640d2191c6871f2231945a
-  };
+  user?: BackendUserData;
   // El backend puede devolver el usuario directamente sin envolverlo en "user"
   id?: string;
   _id?: string;
@@ -93,6 +89,23 @@ interface BackendAuthResponse {
   cedula?: string;
   token?: string;
   message?: string;
+  role?: string;
+}
+
+type ApiClientEnvelope<T> = {
+  success?: boolean;
+  data?: T;
+  message?: string;
+  error?: unknown;
+};
+
+function unwrapApiClientData<T>(raw: unknown): T | null {
+  if (raw && typeof raw === 'object' && 'data' in (raw as any)) {
+    const maybeEnvelope = raw as ApiClientEnvelope<T>;
+    // Backend (express) responde { success, data, message }. Nosotros queremos ese "data".
+    if (maybeEnvelope.data) return maybeEnvelope.data;
+  }
+  return (raw as T) ?? null;
 }
 
 export const authService = {
@@ -116,27 +129,28 @@ export const authService = {
       if (response.success && response.data) {
         console.log('✅ [Auth] Registro exitoso');
         
-        const backendUser = response.data.user;
+        const payload = unwrapApiClientData<BackendAuthResponse>(response.data);
+        const backendUser: BackendUserData = (payload?.user || payload) as BackendUserData;
         const user: User = {
           cedula: backendUser?.cedula || data.cedula,
-          nombreCompleto: backendUser?.name || data.name,
-          primerNombre: (backendUser?.name || data.name).split(' ')[0],
-          segundoNombre: (backendUser?.name || data.name).split(' ')[1] || '',
-          primerApellido: (backendUser?.name || data.name).split(' ')[2] || '',
-          segundoApellido: (backendUser?.name || data.name).split(' ')[3] || '',
-          email: backendUser?.email || data.email || '',
+          nombreCompleto: (backendUser?.name || backendUser?.nombre || backendUser?.nombreCompleto || data.name),
+          primerNombre: (backendUser?.name || backendUser?.nombre || backendUser?.nombreCompleto || data.name).split(' ')[0],
+          segundoNombre: (backendUser?.name || backendUser?.nombre || backendUser?.nombreCompleto || data.name).split(' ')[1] || '',
+          primerApellido: (backendUser?.name || backendUser?.nombre || backendUser?.nombreCompleto || data.name).split(' ')[2] || '',
+          segundoApellido: (backendUser?.name || backendUser?.nombre || backendUser?.nombreCompleto || data.name).split(' ')[3] || '',
+          email: (backendUser?.email || backendUser?.correo || data.email || '') || '',
           role: (backendUser?.role as 'admin' | 'user' | 'issuer' | undefined) || undefined,
         };
 
         // Guardar token si existe
-        if (response.data.token) {
-          localStorage.setItem('movilis_token', response.data.token);
+        if (payload?.token) {
+          localStorage.setItem('movilis_token', payload.token);
         }
 
         return {
           success: true,
           user,
-          token: response.data.token,
+          token: payload?.token,
           message: 'Registro exitoso',
         };
       }
@@ -173,9 +187,10 @@ export const authService = {
       if (response.success && response.data) {
         console.log('✅ [Auth] Login exitoso');
 
-        const data = response.data;
-        // El usuario puede venir en data.user o directamente en data
-        const backendUser = data.user || data;
+        // apiClient devuelve la respuesta completa del backend (envelope {success, data, message})
+        const payload = unwrapApiClientData<BackendAuthResponse>(response.data);
+        // El usuario puede venir en payload.user o directamente en payload
+        const backendUser: BackendUserData = (payload?.user || payload) as BackendUserData;
         
         console.log('👤 [Auth] Datos del usuario del backend:', backendUser);
 
@@ -184,23 +199,16 @@ export const authService = {
         // Extraer email (probar varios campos posibles)
         const email = backendUser?.email || backendUser?.correo || '';
         // Extraer cédula (probar varios campos posibles)
-        const userCedula = backendUser?.cedula || backendUser?.id || backendUser?._id || cedula;
+        const userCedula = backendUser?.cedula || cedula;
+        // Extraer role (probar varios campos posibles)
+        const role = (backendUser?.role as 'admin' | 'user' | 'issuer' | undefined) || undefined;
 
         console.log('📝 [Auth] Nombre extraído:', nombre);
         console.log('📝 [Auth] Email extraído:', email);
         console.log('📝 [Auth] Cédula extraída:', userCedula);
+        console.log('📝 [Auth] Role extraído:', role);
 
         const user: User = {
-<<<<<<< HEAD
-          cedula: backendUser?.cedula || backendUser?.id || '',
-          nombreCompleto: backendUser?.name || '',
-          primerNombre: (backendUser?.name || '').split(' ')[0],
-          segundoNombre: (backendUser?.name || '').split(' ')[1] || '',
-          primerApellido: (backendUser?.name || '').split(' ')[2] || '',
-          segundoApellido: (backendUser?.name || '').split(' ')[3] || '',
-          email: backendUser?.email || data.email,
-          role: (backendUser?.role as 'admin' | 'user' | 'issuer' | undefined) || undefined,
-=======
           cedula: String(userCedula),
           nombreCompleto: nombre,
           primerNombre: nombre.split(' ')[0] || '',
@@ -208,20 +216,20 @@ export const authService = {
           primerApellido: nombre.split(' ')[2] || '',
           segundoApellido: nombre.split(' ')[3] || '',
           email: email,
->>>>>>> 745fdb5aed72aefc4a640d2191c6871f2231945a
+          role: role,
         };
 
         console.log('👤 [Auth] Usuario final mapeado:', user);
 
         // Guardar token si existe
-        if (data.token) {
-          localStorage.setItem('movilis_token', data.token);
+        if (payload?.token) {
+          localStorage.setItem('movilis_token', payload.token);
         }
 
         return {
           success: true,
           user,
-          token: data.token,
+          token: payload?.token,
           message: 'Inicio de sesión exitoso',
         };
       }
@@ -249,69 +257,6 @@ export const authService = {
       // Modo demo: usar datos de prueba
       console.log('🔐 [Auth] Modo demo - buscando usuario...');
       await delay(1000);
-<<<<<<< HEAD
-      user = DEMO_USERS[cleanedCedula] || null;
-    } else {
-      // Modo backend: enviar cédula directamente al backend
-      console.log('🔐 [Auth] Conectando al backend con cédula...');
-      try {
-        const response = await apiClient.post<BackendAuthResponse>(
-          API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-          { cedula: cleanedCedula }
-        );
-
-        if (response.success && response.data) {
-          console.log('✅ [Auth] Login exitoso con backend');
-          
-          // El backend devuelve: { success: true, data: { user: {...}, token: "..." } }
-          // El apiClient envuelve esto en: { success: true, data: { success: true, data: {...} } }
-          const backendResponse = response.data as any;
-          const backendData = backendResponse.data || backendResponse;
-          const backendUser = backendData.user;
-          
-          if (!backendUser) {
-            console.error('❌ [Auth] No se encontró el usuario en la respuesta:', backendResponse);
-            throw new Error('Usuario no encontrado en la respuesta del servidor');
-          }
-
-          user = {
-            cedula: backendUser.cedula || cleanedCedula,
-            nombreCompleto: backendUser.name || backendUser.nombreCompleto || '',
-            primerNombre: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[0],
-            segundoNombre: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[1] || '',
-            primerApellido: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[2] || '',
-            segundoApellido: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[3] || '',
-            email: backendUser.email,
-            role: backendUser.role,
-          };
-          
-          const userData: User = {
-            cedula: backendUser.cedula || cleanedCedula,
-            nombreCompleto: backendUser.name || backendUser.nombreCompleto || '',
-            primerNombre: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[0],
-            segundoNombre: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[1] || '',
-            primerApellido: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[2] || '',
-            segundoApellido: (backendUser.name || backendUser.nombreCompleto || '').split(' ')[3] || '',
-            email: backendUser.email || '',
-            role: backendUser.role,
-          };
-
-          // Guardar token si existe
-          const token = backendData.token;
-          if (token) {
-            localStorage.setItem('movilis_token', token);
-          }
-
-          return {
-            success: true,
-            user: userData,
-            token: token,
-            message: 'Inicio de sesión exitoso',
-          };
-        }
-      } catch (error) {
-        console.error('❌ [Auth] Error en login con backend:', error);
-=======
       const user = DEMO_USERS[cleanedCedula] || null;
       
       if (user) {
@@ -321,7 +266,6 @@ export const authService = {
           token: `token_${Date.now()}`,
           message: 'Inicio de sesión exitoso',
         };
->>>>>>> 745fdb5aed72aefc4a640d2191c6871f2231945a
       }
       
       return {
